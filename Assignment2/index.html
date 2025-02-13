@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Surya" />
+    <meta
+      name="keywords"
+      content="mapping, storytelling, urban design, new york"
+    />
+    <title>Assignment 1 - Web Map</title>
+    <link rel="stylesheet" href="../style.css" />
+    <!-- <iframe 
+      width='100%' 
+      height='400px' 
+      src="https://api.mapbox.com/styles/v1/sk3425/cm6o41tya01b701qmdpu9boh5/draft.html?title=false&access_token=pk.eyJ1Ijoic2szNDI1IiwiYSI6ImNtNmpmeTVnYzAwaTEyaXE4ZWZ4OG9yazIifQ.TsQiMmufb4nsdomDobl1nA&zoomwheel=false#12.72/40.73761/-73.9891" 
+      title="Intermediate applications-copy" 
+      style="border:none;"
+      ></iframe> -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0 !important; /* You can adjust this value as needed */
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="menu"></nav>
+    <div id='map'></div>
+    <div id='title' class="title">
+        <h1>The Geographical Distribution of Subway<br> Usage Decrease Due to COVID-19</h1>
+        <p>This map documents changes in ridership by subway station between March 6 and March 20th, as measured through turnstile usage. The data is provided by the New York City Metro Transit Authority. To contextualize station locations across the five boroughs, an additional layer (Median Household Income) has been added. This data is block group-level estimates provided by the American Community Survey of the U.S. Census Bureau.</p>
+        <hr>
+        <div id="turnstile-legend" class="legend2">
+            <h4>Drop in Ridership</h4>
+            <p><em>Click on stations for detailed turnstile usage</em></p>
+            <div><span style="background-color: #fef0d3"></span>&#8594;<span style="background-color: #ff4400; height:20px; width:20px"></span> < 50% decrease to > 90% decrease</div>
+        </div>
+        <div id="income-legend" class="legend">
+            <h4>Median Household Income</h4>
+            <div><span style="background-color: #00a2ca"></span>$150,000 +</div>
+            <div><span style="background-color: #33b5d5"></span>$100,000 - $150,000</div>
+            <div><span style="background-color: #66c7e0"></span>$75,000 - $100,000</div>
+            <div><span style="background-color: #99daea"></span>$50,000 - $75,000</div>
+            <div><span style="background-color: #ccedf5"></span>$20,000 - $50,000</div>
+            <div><span style="background-color: #ffffff"></span>Less than $20,000</div>
+        </div>
+    </div>
+    <script type='text/javascript' src="map.js"></script>
+</body>
+
+</html>
