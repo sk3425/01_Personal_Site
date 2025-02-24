@@ -130,6 +130,8 @@ function createMap(containerId, mapType, projection) {
           break;
         case "Above +1.5SD":
           jobAccessDescription = "High access to jobs";
+        case "+1.5SD ~ +2.5SD":
+          jobAccessDescription = "Very high access to jobs";
           break;
         case ">=+2.5SD":
           jobAccessDescription = "Excellent access to jobs";
@@ -144,8 +146,7 @@ function createMap(containerId, mapType, projection) {
           '<h4>Mobility Index</h4>' +
           '<p>' + ttiText + '</p>' +
           '<h4>Job Accessibility</h4>' +
-          '<p><b>Job Category:</b> ' + jobAccessDescription + '</p>' +
-          '<p><em>The Transit Travelshed Index (TTI) measures transit connectivity efficiency. Lower TTI values indicate optimal mobility and better access to jobs, whereas higher values signal congestion and reduced job access.</em></p>'
+          '<p><b>Job Category:</b> ' + jobAccessDescription + '</p>' 
         )
         .addTo(map);
     });
