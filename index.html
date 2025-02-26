@@ -6,12 +6,10 @@
     <meta name="author" content="Surya" />
     <meta
       name="keywords"
-      content="mapping, storytelling, urban design, new york, mobility index, transit accessibility"
+      content="mapping, storytelling, urban design, new york"
     />
-    <title>Transit Travelshed Index - Web Map</title>
-    <link rel="stylesheet" href="../style.css" />
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.js"></script>
+    <title>Demo Personal Site</title>
+    <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,100 +17,109 @@
       rel="stylesheet"
     />
     <style>
-      /* Make sure the body and html fill the viewport */
-      html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden;
-      }
-      /* Slider container holds all map slides */
-      #slider {
-        display: flex;
-        width: 300vw; /* 3 slides × 100vw each */
-        height: 100vh;
-        transition: transform 0.5s ease;
-      }
-      /* Each slide fills the viewport */
-      .slide {
-        width: 100vw;
-        height: 100vh;
-        position: relative;
-      }
-      /* Navigation buttons */
-      .nav-button {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 10;
-        background: rgba(255, 255, 255, 0.7);
-        border: none;
-        font-size: 2rem;
-        cursor: pointer;
-        padding: 0.5em 1em;
-      }
-      #prev {
-        left: 10px;
-      }
-      #next {
-        right: 10px;
-      }
-      /* Optional: style for menu if needed */
-      #menu {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 10;
+      body {
+        margin-left: 50px; /* You can adjust this value as needed */
       }
     </style>
   </head>
   <body>
-    <!-- Navigation buttons -->
-    <button id="prev" class="nav-button">&#10094;</button>
-    <button id="next" class="nav-button">&#10095;</button>
+    <header>
+      <a
+        class="nav-title"
+        href="/Personal_Site/01_PersonalSite/"
+        >MY PORTFOLIO</a
+      >
+    </header>
+    <main>
+      <section id="about">
+        <img
+            class="profile-thumbnail"
+            src="./Images/img_1.jpg"
+            alt="Thumbnail image for assignment 1"
+          />
+        <p>Hi! I'm Surya Kumar</p>
+        <p>
+          I am a graduate student at Cornell AAP in New York City. Im doing a 
+          <a href="https://aap.cornell.edu/academics/architecture/graduate/ms-aud" target="_blank">Master of Science in Advanced Urban Design</a>.
+          I'm an Architect from India with over 7 years of work experience at 
+          <a href="https://rmaarchitects.com/" target="_blank"
+            >Rahul Mehrotra Architects</a> and at 
+          <a href="https://casedesign.in/" target="_blank">
+            Case Design Architects</a> in Bombay, India.
+        </p>
+        <p>
+          I aim to hypothesize planning and design at the crux of the convergence of
+past influence and present technologies that can build future communities with better social reforms,
+economics, and public transportation. 
+          
+        </p>
+      </section>
+      <section id="assignments">
+        <h2>My Assignments</h2>
+        <div class="assignment">
+          <img
+            class="assignment-thumbnail"
+            src="./Images/img_2.jpg"
+            alt="Thumbnail image for assignment 1"
+          />
 
-    <!-- Slider container wrapping three full-screen maps -->
-    <div id="slider">
-      <div id="map1" class="slide"></div>
-      <div id="map2" class="slide"></div>
-      <div id="map3" class="slide"></div>
-    </div>
-
-    <!-- Optional menu container -->
-    <div id="menu"></div>
-
-    <!-- Title and legend section (can be placed as needed) -->
-    <div id="title" class="title" style="position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(255,255,255,0.8); padding: 1em; max-width: 300px;">
-      <h1>Transit Travelshed Index in NYC</h1>
-      <p>
-        This map visualizes the <strong>Transit Travelshed Index (TTI)</strong>, representing accessibility and mobility efficiency across different neighborhoods in New York City. Areas with <strong>higher TTI values</strong> indicate greater congestion and longer travel times, while <strong>lower TTI values</strong> suggest more efficient transit access.
+          <p class="assignment-title">
+            <a href="./Assignment1/index.html"
+              >Assignment 1 </a
+            >
+          </p>
+          <p class="assignment-description">
+            Custom style of a New York base map.
+          </p>
+          <img
+          class="assignment-thumbnail"
+          src="./Images/A2.png"
+          alt="Thumbnail image for assignment 2"
+        />
+          <p class="assignment-title">
+            <a href="./Assignment2/index.html"
+              >Assignment 2 </a
+            >
+          </p>
+          <p class="assignment-description">
+            Webmapping
+          </p>
+          <img
+          class="assignment-thumbnail"
+          src="./Images/A3.png"
+          alt="Thumbnail image for assignment 3"
+        />
+          <p class="assignment-title">
+            <a href="./Assignment3/index.html"
+              >Assignment 3 </a
+            >
+          </p>
+          <p class="assignment-description">
+            Interactive webmapping
+          </p>
+          <img
+          class="assignment-thumbnail"
+          src="./Images/A4.png"
+          alt="Thumbnail image for assignment 3"
+        />
+          <p class="assignment-title">
+            <a href="./Assignment4/index.html"
+              >Assignment 4 </a>          
+            </p>
+          <p class="assignment-description">
+            <a href="https://colab.research.google.com/drive/1QY1PTAPHz3UfAR9oGuw3kfGspVlbaiNo#scrollTo=OavJdQHdtKiu" target="_blank">Link to collab notebook</a>.
+          </p>
+          <p class="assignment-description">
+            Projections and classifications
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p class="footer-text">
+        Send me a <a href="mailto:surya03mail@gmail.com">mail</a> or visit
+        <a href="https://sk3425.github.io/01_Personal_Site//">my site</a>.
       </p>
-      <hr>
-      <!-- Legend -->
-      <div id="Legend" class="legend2">
-        <h4>Legend: Transit Travelshed Index</h4>
-        <div>
-          <span style="background-color: #ffedea; display: inline-block; width: 20px; height: 20px;"></span>
-          TTI: <strong>1.0 - 1.2</strong> (Optimal Mobility)
-        </div>
-        <div>
-          <span style="background-color: #ffcec5; display: inline-block; width: 20px; height: 20px;"></span>
-          TTI: <strong>1.2 - 1.4</strong> (Moderate Congestion)
-        </div>
-        <div>
-          <span style="background-color: #ffad9f; display: inline-block; width: 20px; height: 20px;"></span>
-          TTI: <strong>1.4 - 1.6</strong> (High Congestion)
-        </div>
-        <div>
-          <span style="background-color: #ff8a75; display: inline-block; width: 20px; height: 20px;"></span>
-          TTI: <strong>1.6 - 1.8</strong> (Severe Congestion)
-        </div>
-        <div>
-          <span style="background-color: #e02e17; display: inline-block; width: 20px; height: 20px;"></span>
-          TTI: <strong>1.8 - 2.5</strong> (Extreme Congestion)
-        </div>
-      </div>
-    </div>
-    <script type="text/javascript" src="map.js"></script>
+    </footer>
   </body>
 </html>
