@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Transportation Modes Census Data Visualization</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Open Sans', sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        .map-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            margin-right: 20px;
+            overflow: auto;
+            border-radius: 3px;
+            padding: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            max-width: 300px;
+        }
+        .mapboxgl-popup {
+            max-width: 400px;
+        }
+        .mapboxgl-popup-content {
+            padding: 15px;
+        }
+        .transportation-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+        .transportation-table th, .transportation-table td {
+            border: 1px solid #ddd;
+            padding: 4px;
+            text-align: left;
+        }
+        .transportation-table th {
+            background-color: #f2f2f2;
+        }
+        .transportation-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .popup-title {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .control-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 3px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        select {
+            padding: 5px;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        .map-title {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 3px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .map-description {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 3px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            font-size: 12px;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .legend-slider-container {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .legend-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to right, #fff5eb, #fee6ce, #fdd0a2, #fdae6b, #fd8d3c, #f16913, #d94801, #a63603, #7f2704);
+            outline: none;
+            border-radius: 10px;
+        }
+        .legend-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+        .legend-slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+        .legend-value {
+            text-align: center;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .legend-min-max {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        .slider-divider {
+            margin: 15px 0;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<div class="map-title">Modes of Transportation in the US</div>
+<div class="map-description">
+    This visualization explores transportation patterns across the United States using Census Bureau data. 
+    Variables include various modes of transport such as car/truck usage, public transit options, 
+    cycling, walking, and remote work. The data reveals that in only a few major metropolitan areas 
+    do significant numbers of people rely on public transportation, while private vehicles remain 
+    the dominant transport mode throughout most of the country.
+</div>
+<div class="map-overlay" id="legend"></div>
+<div class="control-panel">
+    <h4>Transportation Mode</h4>
+    <select id="mode-select">
+        <option value="B08301_001E">Total (All Transportation Modes)</option>
+        <option value="B08301_002E">Car, truck, or van</option>
+        <option value="B08301_003E">Drove alone</option>
+        <option value="B08301_004E">Carpooled</option>
+        <option value="B08301_010E">Public transportation</option>
+        <option value="B08301_016E">Taxicab</option>
+        <option value="B08301_017E">Motorcycle</option>
+        <option value="B08301_018E">Bicycle</option>
+        <option value="B08301_019E">Walked</option>
+        <option value="B08301_021E">Worked from home</option>
+    </select>
+</div>
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic2szNDI1IiwiYSI6ImNtNmpmeTVnYzAwaTEyaXE4ZWZ4OG9yazIifQ.TsQiMmufb4nsdomDobl1nA';
+    
+    // Define transportation code descriptions
+    const transportationCodes = {
+        "B08301_001E": "Total (All Transportation Modes)",
+        "B08301_002E": "Car, truck, or van",
+        "B08301_003E": "Drove alone",
+        "B08301_004E": "Carpooled",
+        "B08301_010E": "Public transportation (excluding taxicab)",
+        "B08301_011E": "Bus",
+        "B08301_012E": "Subway or elevated rail",
+        "B08301_013E": "Long-distance train or commuter rail",
+        "B08301_015E": "Ferryboat",
+        "B08301_016E": "Taxicab",
+        "B08301_017E": "Motorcycle",
+        "B08301_018E": "Bicycle",
+        "B08301_019E": "Walked",
+        "B08301_020E": "Other means",
+        "B08301_021E": "Worked from home"
+    };
+    
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [-98, 38.88], // US center
+        zoom: 3
+    });
+
+    const zoomThreshold = 4;
+    let currentMode = 'B08301_001E'; // Default to total
+    let sliderValue = 0; // Default slider value
+    let publicTransportSliderValue = 0; // Default public transport slider value
+    
+    // Helper function to get all transportation data for a feature
+    function getTransportationData(properties) {
+        let data = [];
+        for (const [key, value] of Object.entries(properties)) {
+            if (key.startsWith('B08301_') && key.endsWith('E') && transportationCodes[key]) {
+                const description = transportationCodes[key] || key;
+                
+                data.push({
+                    code: key,
+                    description: description,
+                    value: parseInt(value) || 0
+                });
+            }
+        }
+        
+        // Sort by code to maintain order
+        data.sort((a, b) => {
+            const numA = parseInt(a.code.match(/\d+/)[0]);
+            const numB = parseInt(b.code.match(/\d+/)[0]);
+            return numA - numB;
+        });
+        
+        return data;
+    }
+    
+    // Orange color palette
+    const orangeColorScale = [
+        '#fff5eb',
+        '#fee6ce',
+        '#fdd0a2',
+        '#fdae6b',
+        '#fd8d3c',
+        '#f16913',
+        '#d94801',
+        '#a63603',
+        '#7f2704'
+    ];
+    
+    function updateMapLayers() {
+        if (map.getLayer('state-transportation')) {
+            map.setPaintProperty('state-transportation', 'fill-color', [
+                'interpolate',
+                ['linear'],
+                ['to-number', ['get', currentMode]],
+                0, orangeColorScale[0],
+                500000, orangeColorScale[1],
+                1000000, orangeColorScale[2],
+                1500000, orangeColorScale[3],
+                2000000, orangeColorScale[4],
+                2500000, orangeColorScale[5],
+                3000000, orangeColorScale[6],
+                3500000, orangeColorScale[7],
+                4000000, orangeColorScale[8]
+            ]);
+            
+            map.setPaintProperty('state-highlighted', 'fill-color', [
+                'interpolate',
+                ['linear'],
+                ['to-number', ['get', currentMode]],
+                0, orangeColorScale[0],
+                500000, orangeColorScale[1],
+                1000000, orangeColorScale[2],
+                1500000, orangeColorScale[3],
+                2000000, orangeColorScale[4],
+                2500000, orangeColorScale[5],
+                3000000, orangeColorScale[6],
+                3500000, orangeColorScale[7],
+                4000000, orangeColorScale[8]
+            ]);
+        }
+        
+        if (map.getLayer('county-transportation')) {
+            map.setPaintProperty('county-transportation', 'fill-color', [
+                'interpolate',
+                ['linear'],
+                ['to-number', ['get', currentMode]],
+                0, orangeColorScale[0],
+                50000, orangeColorScale[1],
+                100000, orangeColorScale[2],
+                150000, orangeColorScale[3],
+                200000, orangeColorScale[4],
+                250000, orangeColorScale[5],
+                300000, orangeColorScale[6],
+                350000, orangeColorScale[7],
+                400000, orangeColorScale[8]
+            ]);
+            
+            map.setPaintProperty('county-highlighted', 'fill-color', [
+                'interpolate',
+                ['linear'],
+                ['to-number', ['get', currentMode]],
+                0, orangeColorScale[0],
+                50000, orangeColorScale[1],
+                100000, orangeColorScale[2],
+                150000, orangeColorScale[3],
+                200000, orangeColorScale[4],
+                250000, orangeColorScale[5],
+                300000, orangeColorScale[6],
+                350000, orangeColorScale[7],
+                400000, orangeColorScale[8]
+            ]);
+        }
+        
+        updateLegend(map.getZoom());
+    }
+
+    map.on('load', () => {
+        // Add state level GeoJSON source
+        map.addSource('state_data', {
+            'type': 'geojson',
+            'data': 'data/stateandcensus.geojson'
+        });
+
+        // Add county level GeoJSON source
+        map.addSource('county_data', {
+            'type': 'geojson',
+            'data': 'data/countyandcensus_gdf.geojson'
+        });
+
+        // State-level transportation layer (displayed when zoomed out)
+        map.addLayer({
+            'id': 'state-transportation',
+            'type': 'fill',
+            'source': 'state_data',
+            'maxzoom': zoomThreshold,
+            'paint': {
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['to-number', ['get', currentMode]],
+                    0, orangeColorScale[0],
+                    500000, orangeColorScale[1],
+                    1000000, orangeColorScale[2],
+                    1500000, orangeColorScale[3],
+                    2000000, orangeColorScale[4],
+                    2500000, orangeColorScale[5],
+                    3000000, orangeColorScale[6],
+                    3500000, orangeColorScale[7],
+                    4000000, orangeColorScale[8]
+                ],
+                'fill-opacity': 0.7,
+                'fill-outline-color': '#000'
+            }
+        });
+
+        // County-level transportation layer (displayed when zoomed in)
+        map.addLayer({
+            'id': 'county-transportation',
+            'type': 'fill',
+            'source': 'county_data',
+            'minzoom': zoomThreshold,
+            'paint': {
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['to-number', ['get', currentMode]],
+                    0, orangeColorScale[0],
+                    50000, orangeColorScale[1],
+                    100000, orangeColorScale[2],
+                    150000, orangeColorScale[3],
+                    200000, orangeColorScale[4],
+                    250000, orangeColorScale[5],
+                    300000, orangeColorScale[6],
+                    350000, orangeColorScale[7],
+                    400000, orangeColorScale[8]
+                ],
+                'fill-opacity': 0.7,
+                'fill-outline-color': '#000'
+            }
+        });
+
+        // Add border layers
+        map.addLayer({
+            'id': 'state-borders',
+            'type': 'line',
+            'source': 'state_data',
+            'maxzoom': zoomThreshold,
+            'layout': {},
+            'paint': {
+                'line-color': '#000',
+                'line-width': 0.5
+            }
+        });
+
+        map.addLayer({
+            'id': 'county-borders',
+            'type': 'line',
+            'source': 'county_data',
+            'minzoom': zoomThreshold,
+            'layout': {},
+            'paint': {
+                'line-color': '#000',
+                'line-width': 0.3
+            }
+        });
+
+        // Add hover state for both layers
+        map.addLayer({
+            'id': 'state-highlighted',
+            'type': 'fill',
+            'source': 'state_data',
+            'maxzoom': zoomThreshold,
+            'paint': {
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['to-number', ['get', currentMode]],
+                    0, orangeColorScale[0],
+                    500000, orangeColorScale[1],
+                    1000000, orangeColorScale[2],
+                    1500000, orangeColorScale[3],
+                    2000000, orangeColorScale[4],
+                    2500000, orangeColorScale[5],
+                    3000000, orangeColorScale[6],
+                    3500000, orangeColorScale[7],
+                    4000000, orangeColorScale[8]
+                ],
+                'fill-opacity': 0.9,
+                'fill-outline-color': '#000'
+            },
+            'filter': ['==', 'GEOID', '']
+        });
+
+        map.addLayer({
+            'id': 'county-highlighted',
+            'type': 'fill',
+            'source': 'county_data',
+            'minzoom': zoomThreshold,
+            'paint': {
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['to-number', ['get', currentMode]],
+                    0, orangeColorScale[0],
+                    50000, orangeColorScale[1],
+                    100000, orangeColorScale[2],
+                    150000, orangeColorScale[3],
+                    200000, orangeColorScale[4],
+                    250000, orangeColorScale[5],
+                    300000, orangeColorScale[6],
+                    350000, orangeColorScale[7],
+                    400000, orangeColorScale[8]
+                ],
+                'fill-opacity': 0.9,
+                'fill-outline-color': '#000'
+            },
+            'filter': ['==', 'GEOID', '']
+        });
+
+        // Create a popup with enhanced information
+        const popup = new mapboxgl.Popup({
+            closeButton: true,
+            closeOnClick: false,
+            maxWidth: '400px'
+        });
+
+        // Generate HTML table for transportation data
+        function generateTransportationTable(data) {
+            let html = '<table class="transportation-table">';
+            html += '<tr><th>Transportation Mode</th><th>People Count</th></tr>';
+            
+            for (const item of data) {
+                html += `<tr>
+                    <td>${item.description}</td>
+                    <td>${item.value.toLocaleString()}</td>
+                </tr>`;
+            }
+            
+            html += '</table>';
+            return html;
+        }
+
+        // Add mouse events for states
+        map.on('mousemove', 'state-transportation', (e) => {
+            if (e.features.length > 0) {
+                map.getCanvas().style.cursor = 'pointer';
+                const feature = e.features[0];
+                map.setFilter('state-highlighted', ['==', 'GEOID', feature.properties.GEOID]);
+            }
+        });
+        
+        map.on('click', 'state-transportation', (e) => {
+            if (e.features.length > 0) {
+                const feature = e.features[0];
+                const transportationData = getTransportationData(feature.properties);
+                
+                let popupContent = `<h3 class="popup-title">${feature.properties.NAME || 'State'}</h3>`;
+                popupContent += `<p><strong>${transportationCodes[currentMode]}:</strong> ${parseInt(feature.properties[currentMode]).toLocaleString()} people</p>`;
+                popupContent += `<h4>All Transportation Modes</h4>`;
+                popupContent += generateTransportationTable(transportationData);
+                
+                popup
+                    .setLngLat(e.lngLat)
+                    .setHTML(popupContent)
+                    .addTo(map);
+            }
+        });
+
+        map.on('mouseleave', 'state-transportation', () => {
+            map.getCanvas().style.cursor = '';
+            map.setFilter('state-highlighted', ['==', 'GEOID', '']);
+        });
+
+        // Add mouse events for counties
+        map.on('mousemove', 'county-transportation', (e) => {
+            if (e.features.length > 0) {
+                map.getCanvas().style.cursor = 'pointer';
+                const feature = e.features[0];
+                map.setFilter('county-highlighted', ['==', 'GEOID', feature.properties.GEOID]);
+            }
+        });
+        
+        map.on('click', 'county-transportation', (e) => {
+            if (e.features.length > 0) {
+                const feature = e.features[0];
+                const transportationData = getTransportationData(feature.properties);
+                
+                let popupContent = `<h3 class="popup-title">${feature.properties.NAME_y || feature.properties.NAME_x || 'County'}</h3>`;
+                popupContent += `<p><strong>${transportationCodes[currentMode]}:</strong> ${parseInt(feature.properties[currentMode]).toLocaleString()} people</p>`;
+                popupContent += `<h4>All Transportation Modes</h4>`;
+                popupContent += generateTransportationTable(transportationData);
+                
+                popup
+                    .setLngLat(e.lngLat)
+                    .setHTML(popupContent)
+                    .addTo(map);
+            }
+        });
+
+        map.on('mouseleave', 'county-transportation', () => {
+            map.getCanvas().style.cursor = '';
+            map.setFilter('county-highlighted', ['==', 'GEOID', '']);
+        });
+
+        // Create dynamic legend based on zoom
+        const legend = document.getElementById('legend');
+        
+        function updateLegend(zoom) {
+            const modeName = transportationCodes[currentMode] || currentMode;
+            legend.innerHTML = '';
+            
+            // Add legend title
+            legend.innerHTML = `<div class="legend-title">${modeName} Usage</div>`;
+            
+            // Create slider container
+            const sliderContainer = document.createElement('div');
+            sliderContainer.className = 'legend-slider-container';
+            
+            // Create slider
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = '0';
+            slider.max = zoom < zoomThreshold ? '4000000' : '400000';
+            slider.value = sliderValue;
+            slider.className = 'legend-slider';
+            
+            // Create value display
+            const valueDisplay = document.createElement('div');
+            valueDisplay.className = 'legend-value';
+            valueDisplay.textContent = `${parseInt(slider.value).toLocaleString()} people`;
+            
+            // Create min/max labels
+            const minMaxContainer = document.createElement('div');
+            minMaxContainer.className = 'legend-min-max';
+            
+            const minLabel = document.createElement('div');
+            minLabel.textContent = 'Minimum';
+            
+            const maxLabel = document.createElement('div');
+            maxLabel.textContent = 'Maximum';
+            
+            minMaxContainer.appendChild(minLabel);
+            minMaxContainer.appendChild(maxLabel);
+            
+            // Add event listener for slider
+            slider.addEventListener('input', function() {
+                sliderValue = this.value;
+                valueDisplay.textContent = `${parseInt(this.value).toLocaleString()} people`;
+                
+                // Highlight areas with values greater than or equal to the slider value
+                if (zoom < zoomThreshold) {
+                    // State level
+                    map.setFilter('state-transportation', ['>=', ['to-number', ['get', currentMode]], parseInt(sliderValue)]);
+                } else {
+                    // County level
+                    map.setFilter('county-transportation', ['>=', ['to-number', ['get', currentMode]], parseInt(sliderValue)]);
+                }
+            });
+            
+            // Reset filters when slider is released
+            slider.addEventListener('change', function() {
+                map.setFilter('state-transportation', null);
+                map.setFilter('county-transportation', null);
+            });
+            
+            // Add elements to container
+            sliderContainer.appendChild(slider);
+            sliderContainer.appendChild(valueDisplay);
+            sliderContainer.appendChild(minMaxContainer);
+            
+            // Add slider to legend
+            legend.appendChild(sliderContainer);
+
+            // Create divider
+            const divider = document.createElement('div');
+            divider.className = 'slider-divider';
+            legend.appendChild(divider);
+            
+            // Add Public Transportation slider
+            const publicTransportTitle = document.createElement('div');
+            publicTransportTitle.className = 'legend-title';
+            publicTransportTitle.textContent = 'Public Transportation Only';
+            legend.appendChild(publicTransportTitle);
+            
+            // Create public transport slider container
+            const publicSliderContainer = document.createElement('div');
+            publicSliderContainer.className = 'legend-slider-container';
+            
+            // Create public transport slider
+            const publicSlider = document.createElement('input');
+            publicSlider.type = 'range';
+            publicSlider.min = '0';
+            publicSlider.max = zoom < zoomThreshold ? '1000000' : '100000'; // Lower max values for public transport
+            publicSlider.value = publicTransportSliderValue;
+            publicSlider.className = 'legend-slider';
+            
+            // Create public transport value display
+            const publicValueDisplay = document.createElement('div');
+            publicValueDisplay.className = 'legend-value';
+            publicValueDisplay.textContent = `${parseInt(publicSlider.value).toLocaleString()} people`;
+            
+            // Create public transport min/max labels
+            const publicMinMaxContainer = document.createElement('div');
+            publicMinMaxContainer.className = 'legend-min-max';
+            
+            const publicMinLabel = document.createElement('div');
+            publicMinLabel.textContent = 'Minimum';
+            
+            const publicMaxLabel = document.createElement('div');
+            publicMaxLabel.textContent = 'Maximum';
+            
+            publicMinMaxContainer.appendChild(publicMinLabel);
+            publicMinMaxContainer.appendChild(publicMaxLabel);
+            
+            // Add event listener for public transport slider
+            publicSlider.addEventListener('input', function() {
+                publicTransportSliderValue = this.value;
+                publicValueDisplay.textContent = `${parseInt(this.value).toLocaleString()} people`;
+                
+                // Highlight areas with public transportation values greater than or equal to the slider value
+                if (zoom < zoomThreshold) {
+                    // State level
+                    map.setFilter('state-transportation', ['>=', ['to-number', ['get', 'B08301_010E']], parseInt(publicTransportSliderValue)]);
+                } else {
+                    // County level
+                    map.setFilter('county-transportation', ['>=', ['to-number', ['get', 'B08301_010E']], parseInt(publicTransportSliderValue)]);
+                }
+            });
+            
+            // Reset filters when public transport slider is released
+            publicSlider.addEventListener('change', function() {
+                map.setFilter('state-transportation', null);
+                map.setFilter('county-transportation', null);
+            });
+            
+            // Add elements to public transport container
+            publicSliderContainer.appendChild(publicSlider);
+            publicSliderContainer.appendChild(publicValueDisplay);
+            publicSliderContainer.appendChild(publicMinMaxContainer);
+            
+            // Add public transport slider to legend
+            legend.appendChild(publicSliderContainer);
+        }
+        
+        // Set initial legend
+        updateLegend(map.getZoom());
+        
+        // Update legend when zoom changes
+        map.on('zoomend', () => {
+            updateLegend(map.getZoom());
+        });
+
+        // Add transportation mode selector functionality
+        document.getElementById('mode-select').addEventListener('change', (e) => {
+            currentMode = e.target.value;
+            sliderValue = 0; // Reset slider value when mode changes
+            updateMapLayers();
+        });
+    });
+</script>
+</body>
+</html>
