@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>Grand Central Parkway Analysis</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            width: 100vw;
+        }
+        #map-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        .map-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            z-index: 1;
+        }
+        .map-overlay h2, .map-overlay h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .legend {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            bottom: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            position: absolute;
+            right: 10px;
+            z-index: 1;
+        }
+        .legend h4 {
+            margin: 0 0 10px;
+        }
+        .legend div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .legend div span {
+            display: inline-block;
+            height: 10px;
+            width: 30px;
+            margin-right: 5px;
+        }
+        .toggle-btn {
+            background: #3887be;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .toggle-btn:hover {
+            background: #2a6495;
+        }
+        .toggle-container {
+            margin-bottom: 15px;
+        }
+        .map-placeholder {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #333;
+            font-size: 18px;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <div class="map-placeholder">Loading map...</div>
+        <div id="map"></div>
+        
+        <div class="map-overlay">
+            <h2>Grand Central Parkway Analysis</h2>
+            <div class="toggle-container">
+                <button id="toggle-main" class="toggle-btn">Show Main Route</button>
+                <button id="toggle-alt" class="toggle-btn">Show Alternative Routes</button>
+                <button id="toggle-heatmap" class="toggle-btn">Toggle Traffic Density</button>
+            </div>
+            
+            <h3>User Profile</h3>
+            <div id="user-stats">
+                <p><strong>Daily Users:</strong> ~120,000</p>
+                <p><strong>Purpose Breakdown:</strong></p>
+                <ul>
+                    <li>Airport Commuters: 35%</li>
+                    <li>Manhattan Work Commuters: 40%</li>
+                    <li>Queens/Brooklyn Residents: 15%</li>
+                    <li>Commercial/Delivery: 10%</li>
+                </ul>
+                <p><strong>Peak Hours:</strong></p>
+                <ul>
+                    <li>Morning: 7:00 AM - 9:30 AM</li>
+                    <li>Evening: 4:00 PM - 7:00 PM</li>
+                    <li>Airport Peaks: Based on flight schedules</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <h4>Legend</h4>
+            <div><span style="background: #FF0000;"></span>GCP Main Stretch</div>
+            <div><span style="background: #0000FF;"></span>Van Wyck Expressway</div>
+            <div><span style="background: #008000;"></span>Junction Blvd Route</div>
+            <div><span style="background: #800080;"></span>Main St Route</div>
+            <div><span style="background: #FFA500;"></span>108th St Route</div>
+            <div><span style="background: #00FFFF;"></span>Northern Blvd to LaGuardia</div>
+            <div><span style="background: #FFA500;"></span>La Guardia Airport</div>
+            <div><span style="background: rgba(255, 0, 0, 0.5);"></span>High Traffic</div>
+            <div><span style="background: rgba(255, 165, 0, 0.5);"></span>Medium Traffic</div>
+            <div><span style="background: rgba(255, 255, 0, 0.5);"></span>Low Traffic</div>
+        </div>
+    </div>
+
+    <script>
+        // Using the provided token
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2szNDI1IiwiYSI6ImNtNmpmeTVnYzAwaTEyaXE4ZWZ4OG9yazIifQ.TsQiMmufb4nsdomDobl1nA';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12', // Updated to a newer style
+            center: [-73.850, 40.749],
+            zoom: 13
+        });
+
+        // Hide placeholder when map loads
+        map.on('load', function() {
+            document.querySelector('.map-placeholder').style.display = 'none';
+        });
+
+        // Main coordinates for the Grand Central Parkway stretch
+        const mainRouteCoordinates = [
+            [-73.853856, 40.757092], // Start point
+            [-73.851978, 40.753981],
+            [-73.850605, 40.751869],
+            [-73.849232, 40.750056],
+            [-73.847923, 40.748041],
+            [-73.846764, 40.745626],
+            [-73.846077, 40.743214],
+            [-73.845762, 40.740397]  // End point
+        ];
+
+        // Define alternative route 1 via Van Wyck Expressway (I-678)
+        const altRoute1Coordinates = [
+            [-73.853856, 40.757092], // Start point near GCP
+            [-73.856688, 40.754921], // Moving southwest to Van Wyck
+            [-73.859778, 40.751839],
+            [-73.862267, 40.748516],
+            [-73.864842, 40.745123],
+            [-73.867073, 40.741984],
+            [-73.868618, 40.738655],
+            [-73.866215, 40.736270],
+            [-73.863297, 40.737524],
+            [-73.859091, 40.739128],
+            [-73.852997, 40.740090],
+            [-73.845762, 40.740397]  // End point
+        ];
+
+        // Define alternative route 2 via Junction Blvd
+        const altRoute2Coordinates = [
+            [-73.853856, 40.757092], // Start point
+            [-73.858577, 40.758236], // Junction Blvd
+            [-73.859307, 40.755621],
+            [-73.860208, 40.752394],
+            [-73.861067, 40.749128],
+            [-73.861924, 40.745871],
+            [-73.862783, 40.742513],
+            [-73.859006, 40.740782],
+            [-73.854929, 40.740505],
+            [-73.845762, 40.740397]  // End point
+        ];
+
+        // Define alternative route 3 via Main St (Flushing to Kew Gardens)
+        const altRoute3Coordinates = [
+            [-73.853856, 40.757092], // Start point
+            [-73.849693, 40.759246], // North to connect to Main St
+            [-73.846088, 40.760914],
+            [-73.842311, 40.761853],
+            [-73.838148, 40.758672], // Main St corridor
+            [-73.836818, 40.754927],
+            [-73.835530, 40.751249],
+            [-73.834500, 40.747391],
+            [-73.836946, 40.744025],
+            [-73.840422, 40.741847],
+            [-73.845762, 40.740397]  // End point
+        ];
+
+        // Define alternative route 4 via 108th St
+        const altRoute4Coordinates = [
+            [-73.853856, 40.757092], // Start point
+            [-73.855959, 40.756428], // 108th St
+            [-73.856989, 40.753201],
+            [-73.857804, 40.750064],
+            [-73.858619, 40.746928],
+            [-73.859262, 40.743701],
+            [-73.858361, 40.741026],
+            [-73.855186, 40.740565],
+            [-73.845762, 40.740397]  // End point
+        ];
+
+        // Define alternative route 5 via Northern Blvd (for LaGuardia access)
+        const altRoute5Coordinates = [
+            [-73.853856, 40.757092], // Start point
+            [-73.850766, 40.759812], // North to Northern Blvd
+            [-73.846303, 40.761297], // Northern Blvd
+            [-73.842011, 40.762597],
+            [-73.837376, 40.763806],
+            [-73.833299, 40.765106],
+            [-73.829093, 40.766495],
+            [-73.824930, 40.767885],
+            [-73.821068, 40.769813], // Towards LaGuardia
+            [-73.872608, 40.775986]  // LaGuardia Airport
+        ];
+
+        // La Guardia Airport location
+        const laguardiaCoordinates = [-73.872608, 40.775986];
+
+        map.on('load', function() {
+            // Add main route
+            map.addSource('main-route', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': mainRouteCoordinates
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'main-route',
+                'type': 'line',
+                'source': 'main-route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#FF0000',
+                    'line-width': 8
+                }
+            });
+
+            // Add alternative route 1
+            map.addSource('alt-route1', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': altRoute1Coordinates
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'alt-route1',
+                'type': 'line',
+                'source': 'alt-route1',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                    'visibility': 'none'
+                },
+                'paint': {
+                    'line-color': '#0000FF',
+                    'line-width': 6,
+                    'line-dasharray': [2, 1]
+                }
+            });
+
+            // Add alternative route 2
+            map.addSource('alt-route2', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': altRoute2Coordinates
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'alt-route2',
+                'type': 'line',
+                'source': 'alt-route2',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                    'visibility': 'none'
+                },
+                'paint': {
+                    'line-color': '#008000',
+                    'line-width': 6,
+                    'line-dasharray': [2, 1]
+                }
+            });
+
+            // Add alternative route 3
+            map.addSource('alt-route3', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': altRoute3Coordinates
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'alt-route3',
+                'type': 'line',
+                'source': 'alt-route3',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                    'visibility': 'none'
+                },
+                'paint': {
+                    'line-color': '#800080',
+                    'line-width': 6,
+                    'line-dasharray': [2, 1]
+                }
+            });
+
+            // Add alternative route 4
+            map.addSource('alt-route4', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': altRoute4Coordinates
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'alt-route4',
+                'type': 'line',
+                'source': 'alt-route4',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                    'visibility': 'none'
+                },
+                'paint': {
+                    'line-color': '#FFA500', // Orange
+                    'line-width': 6,
+                    'line-dasharray': [2, 1]
+                }
+            });
+
+            // Add alternative route 5
+            map.addSource('alt-route5', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': altRoute5Coordinates
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'alt-route5',
+                'type': 'line',
+                'source': 'alt-route5',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                    'visibility': 'none'
+                },
+                'paint': {
+                    'line-color': '#00FFFF', // Cyan
+                    'line-width': 6,
+                    'line-dasharray': [2, 1]
+                }
+            });
+
+            // Add La Guardia Airport marker
+            map.addSource('laguardia', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': laguardiaCoordinates
+                    }
+                }
+            });
+
+            map.addLayer({
+                'id': 'laguardia',
+                'type': 'circle',
+                'source': 'laguardia',
+                'paint': {
+                    'circle-radius': 10,
+                    'circle-color': '#FFA500',
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#000'
+                }
+            });
+
+            // Add heatmap for traffic density
+            map.addSource('traffic-data', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        // Heavy traffic points around main route
+                        ...mainRouteCoordinates.map(coord => ({
+                            'type': 'Feature',
+                            'properties': {'density': 0.8 + Math.random() * 0.2},
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': coord
+                            }
+                        })),
+                        // Medium traffic points around alternative routes
+                        ...altRoute1Coordinates.map(coord => ({
+                            'type': 'Feature',
+                            'properties': {'density': 0.4 + Math.random() * 0.3},
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': coord
+                            }
+                        })),
+                        ...altRoute2Coordinates.map(coord => ({
+                            'type': 'Feature',
+                            'properties': {'density': 0.3 + Math.random() * 0.3},
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': coord
+                            }
+                        })),
+                        ...altRoute3Coordinates.map(coord => ({
+                            'type': 'Feature',
+                            'properties': {'density': 0.2 + Math.random() * 0.3},
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': coord
+                            }
+                        })),
+                        // Add traffic data for new routes
+                        ...altRoute4Coordinates.map(coord => ({
+                            'type': 'Feature',
+                            'properties': {'density': 0.3 + Math.random() * 0.2},
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': coord
+                            }
+                        })),
+                        ...altRoute5Coordinates.map(coord => ({
+                            'type': 'Feature',
+                            'properties': {'density': 0.25 + Math.random() * 0.25},
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': coord
+                            }
+                        }))
+                    ]
+                }
+            });
+
+            map.addLayer({
+                'id': 'traffic-heat',
+                'type': 'heatmap',
+                'source': 'traffic-data',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'paint': {
+                    'heatmap-weight': ['get', 'density'],
+                    'heatmap-intensity': 0.6,
+                    'heatmap-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['heatmap-density'],
+                        0, 'rgba(255,255,0,0)',
+                        0.2, 'rgba(255,255,0,0.5)',
+                        0.4, 'rgba(255,165,0,0.5)',
+                        0.6, 'rgba(255,0,0,0.5)',
+                        1, 'rgba(255,0,0,0.8)'
+                    ],
+                    'heatmap-radius': 15,
+                    'heatmap-opacity': 0.9
+                }
+            });
+
+            // Add user density points
+            const userTypes = [
+                {type: 'Airport Commuters', color: '#1E88E5', percentage: 0.35},
+                {type: 'Manhattan Work Commuters', color: '#D81B60', percentage: 0.40},
+                {type: 'Queens/Brooklyn Residents', color: '#8E24AA', percentage: 0.15},
+                {type: 'Commercial/Delivery', color: '#43A047', percentage: 0.10}
+            ];
+
+            userTypes.forEach((userType, i) => {
+                const features = [];
+                const numPoints = Math.round(userType.percentage * 50); // Scale points by percentage
+                
+                for (let j = 0; j < numPoints; j++) {
+                    // Random points along the main route with some spread
+                    const baseCoord = mainRouteCoordinates[Math.floor(Math.random() * mainRouteCoordinates.length)];
+                    features.push({
+                        'type': 'Feature',
+                        'properties': {
+                            'type': userType.type,
+                            'description': `${userType.type} (${Math.round(userType.percentage * 100)}% of users)`
+                        },
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [
+                                baseCoord[0] + (Math.random() - 0.5) * 0.005,
+                                baseCoord[1] + (Math.random() - 0.5) * 0.005
+                            ]
+                        }
+                    });
+                }
+
+                map.addSource(`user-type-${i}`, {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': features
+                    }
+                });
+
+                map.addLayer({
+                    'id': `user-type-${i}`,
+                    'type': 'circle',
+                    'source': `user-type-${i}`,
+                    'paint': {
+                        'circle-radius': 6,
+                        'circle-color': userType.color,
+                        'circle-opacity': 0.7,
+                        'circle-stroke-width': 1,
+                        'circle-stroke-color': '#fff'
+                    }
+                });
+                
+                // Add this to the legend
+                const legendEntry = document.createElement('div');
+                const legendColor = document.createElement('span');
+                legendColor.style.background = userType.color;
+                legendEntry.appendChild(legendColor);
+                legendEntry.appendChild(document.createTextNode(userType.type));
+                document.querySelector('.legend').appendChild(legendEntry);
+            });
+
+            // Add popups for markers and routes
+            // La Guardia popup
+            const laguardiaPopup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: false
+            });
+
+            map.on('mouseenter', 'laguardia', function() {
+                map.getCanvas().style.cursor = 'pointer';
+                laguardiaPopup
+                    .setLngLat(laguardiaCoordinates)
+                    .setHTML('<h3>La Guardia Airport</h3><p>Major destination for GCP users</p><p>~42,000 daily commuters via GCP</p>')
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'laguardia', function() {
+                map.getCanvas().style.cursor = '';
+                laguardiaPopup.remove();
+            });
+
+            // Add popups for route information
+            const routePopup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: false
+            });
+
+            map.on('mouseenter', 'main-route', function(e) {
+                map.getCanvas().style.cursor = 'pointer';
+                routePopup
+                    .setLngLat(e.lngLat)
+                    .setHTML('<h3>Grand Central Parkway</h3><p>Primary route for airport and Manhattan commuters</p><p>Length: ~1.2 miles</p><p>Peak traffic: 7-9 AM, 4-7 PM</p>')
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'main-route', function() {
+                map.getCanvas().style.cursor = '';
+                routePopup.remove();
+            });
+
+            map.on('mouseenter', 'alt-route1', function(e) {
+                map.getCanvas().style.cursor = 'pointer';
+                routePopup
+                    .setLngLat(e.lngLat)
+                    .setHTML('<h3>Van Wyck Expressway (I-678)</h3><p>Closest highway alternative</p><p>Length: ~1.8 miles</p><p>Estimated travel time: +4-7 min</p>')
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'alt-route1', function() {
+                map.getCanvas().style.cursor = '';
+                routePopup.remove();
+            });
+
+            map.on('mouseenter', 'alt-route2', function(e) {
+                map.getCanvas().style.cursor = 'pointer';
+                routePopup
+                    .setLngLat(e.lngLat)
+                    .setHTML('<h3>Junction Blvd Route</h3><p>Major north-south road parallel to 114th St</p><p>Length: ~1.7 miles</p><p>Estimated travel time: +5-8 min</p>')
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'alt-route2', function() {
+                map.getCanvas().style.cursor = '';
+                routePopup.remove();
+            });
+
+            map.on('mouseenter', 'alt-route3', function(e) {
+                map.getCanvas().style.cursor = 'pointer';
+                routePopup
+                    .setLngLat(e.lngLat)
+                    .setHTML('<h3>Main St Route</h3><p>Commercial corridor connecting Flushing to Kew Gardens</p><p>Length: ~2.0 miles</p><p>Estimated travel time: +7-10 min</p>')
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'alt-route3', function() {
+                map.getCanvas().style.cursor = '';
+                routePopup.remove();
+            });
+
+            map.on('mouseenter', 'alt-route4', function(e) {
+                map.getCanvas().style.cursor = 'pointer';
+                routePopup
+                    .setLngLat(e.lngLat)
+                    .setHTML('<h3>108th Street Route</h3><p>Secondary north-south route west of 114th St</p><p>Length: ~1.7 miles</p><p>Estimated travel time: +6-9 min</p>')
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'alt-route4', function() {
+                map.getCanvas().style.cursor = '';
+                routePopup.remove();
+            });
+
+            map.on('mouseenter', 'alt-route5', function(e) {
+                map.getCanvas().style.cursor = 'pointer';
+                routePopup
+                    .setLngLat(e.lngLat)
+                    .setHTML('<h3>Northern Boulevard Route</h3><p>Direct access to LaGuardia Airport</p><p>Length: ~2.3 miles</p><p>Estimated travel time: +8-12 min</p>')
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'alt-route5', function() {
+                map.getCanvas().style.cursor = '';
+                routePopup.remove();
+            });
+
+            // Add user type popups
+            userTypes.forEach((userType, i) => {
+                map.on('mouseenter', `user-type-${i}`, function(e) {
+                    map.getCanvas().style.cursor = 'pointer';
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    const description = e.features[0].properties.description;
+                    
+                    routePopup
+                        .setLngLat(coordinates)
+                        .setHTML(`<h3>${description}</h3>`)
+                        .addTo(map);
+                });
+
+                map.on('mouseleave', `user-type-${i}`, function() {
+                    map.getCanvas().style.cursor = '';
+                    routePopup.remove();
+                });
+            });
+
+            // Button event listeners
+            document.getElementById('toggle-main').addEventListener('click', function() {
+                const visibility = map.getLayoutProperty('main-route', 'visibility');
+                if (visibility === 'none') {
+                    map.setLayoutProperty('main-route', 'visibility', 'visible');
+                    this.textContent = 'Hide Main Route';
+                } else {
+                    map.setLayoutProperty('main-route', 'visibility', 'none');
+                    this.textContent = 'Show Main Route';
+                }
+            });
+
+            document.getElementById('toggle-alt').addEventListener('click', function() {
+                const routes = ['alt-route1', 'alt-route2', 'alt-route3', 'alt-route4', 'alt-route5'];
+                const visibility = map.getLayoutProperty('alt-route1', 'visibility');
+                
+                if (visibility === 'none') {
+                    routes.forEach(route => {
+                        map.setLayoutProperty(route, 'visibility', 'visible');
+                    });
+                    this.textContent = 'Hide Alternative Routes';
+                } else {
+                    routes.forEach(route => {
+                        map.setLayoutProperty(route, 'visibility', 'none');
+                    });
+                    this.textContent = 'Show Alternative Routes';
+                }
+            });
+
+            document.getElementById('toggle-heatmap').addEventListener('click', function() {
+                const visibility = map.getLayoutProperty('traffic-heat', 'visibility');
+                
+                if (visibility === 'none') {
+                    map.setLayoutProperty('traffic-heat', 'visibility', 'visible');
+                    this.textContent = 'Hide Traffic Density';
+                } else {
+                    map.setLayoutProperty('traffic-heat', 'visibility', 'none');
+                    this.textContent = 'Show Traffic Density';
+                }
+            });
+        });
+        
+        // Handle map loading errors
+        map.on('error', function(e) {
+            console.error('Mapbox error: ', e);
+            document.querySelector('.map-placeholder').textContent = 'Unable to load map. Please check your connection.';
+        });
+    </script>
+</body>
+</html>
