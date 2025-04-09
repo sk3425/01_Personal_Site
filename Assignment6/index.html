@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disadvantaged Communities in NYC Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        .container {
+            width: 95%;
+            max-width: 1100px;
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.1em;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .description, .image-container p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #555;
+        }
+        .description {
+            margin-bottom: 60px;
+        }
+        .image-container {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .image-container .img-wrapper {
+            width: 90%;
+            margin: 0 auto 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+            padding-bottom: 65%; /* Consistent aspect ratio for all images */
+        }
+        .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .image-container p {
+            width: 90%;
+            margin: 0 auto;
+        }
+        code {
+            font-family: 'Source Code Pro', monospace;
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 98%;
+                padding: 15px;
+            }
+            .image-container .img-wrapper,
+            .image-container p {
+                width: 98%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Understanding Disadvantaged Communities in New York City</h1>
+    <p class="description">
+        New York City is home to diverse communities, each with unique challenges and opportunities. Among these, certain neighborhoods have faced systemic disadvantages due to historical and ongoing socio-economic and environmental factors. These areas often struggle with higher unemployment rates, increased rent burdens, and environmental hazards. A significant contributing factor to these disparities is the legacy of redlining—a practice that systematically denied services to residents of certain areas based on racial or ethnic composition. The following visualizations provide insights into these challenges, culminating in an examination of how redlined districts correlate with low employment rates. Below are few graphs showing major environmental justice concerns in Queens' disadvantaged communities.
+    </p>
+
+    <div class="image-container">
+        <div class="img-wrapper">
+            <img src="./Images/1.png"  alt="Queens Disadvantaged Communities: Population vs. Rent Burden">
+        </div>
+        <p>This chart illustrates the relationship between population size and rent burden in Queens' disadvantaged communities. It highlights how neighborhoods with larger populations often experience higher rent burdens, indicating significant economic strain.</p>
+    </div>
+
+    <div class="image-container">
+        <div class="img-wrapper">
+            <img src="./Images/2.png"  alt="Rent Burden vs. Race in Queens Disadvantaged Communities">
+        </div>
+        <p>Here, we see the distribution of rent burden across different racial and ethnic groups in Queens. The data reveals disparities in housing affordability, with communities of color facing higher rent burdens, reflecting systemic housing inequities.</p>
+    </div>
+
+    <div class="image-container">
+        <div class="img-wrapper">
+            <img src="./Images/3.png"  alt="Distribution of Unemployment Rates in Queens Disadvantaged Communities">
+        </div>
+        <p>This graph displays the distribution of unemployment rates across various census tracts in Queens. It demonstrates how unemployment rates tend to increase alongside rent burdens, underscoring the economic challenges within these communities.</p>
+    </div>
+
+    <div class="image-container">
+        <div class="img-wrapper">
+            <img src="./Images/4.png" alt="Environmental Exposure by Borough and Indicator">
+        </div>
+        <p>This chart compares environmental exposure levels between the Bronx and Queens. The Bronx exhibits higher exposure to pollutants like benzene and particulate matter, highlighting environmental justice concerns in lower-income neighborhoods.</p>
+    </div>
+
+    <div class="image-container">
+        <div class="img-wrapper">
+            <img src="./Images/5.png" alt="Total Population by Redline Percentage in Queens">
+        </div>
+        <p>This graph categorizes Queens' population based on the extent of redlining in their areas. It reveals that regions with higher redline percentages contain a disproportionately large share of the population, indicating enduring effects of historical housing discrimination.</p>
+    </div>
+
+    <div class="image-container">
+        <div class="img-wrapper">
+            <img src="./Images/6.png" alt="Scatter Plot: Redline Percentage vs Unemployment Rate in Queens">
+        </div>
+        <p>Finally, this scatter plot correlates unemployment rates with the percentage of redlined areas in Queens, strangely staggering around 60-65% . It highlights the persistent economic disparities in these neighborhoods, where higher unemployment rates align with areas historically subjected to redlining.</p>
+    </div>
+</div>
+</body>
+</html>
