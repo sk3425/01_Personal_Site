@@ -1,0 +1,174 @@
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Transit Travelshed Index - Web Map</title>
+      <link href="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css" rel="stylesheet" />
+      <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.js"></script>
+      <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          overflow: hidden;
+        }
+        /* The slider container holds 3 slides side-by-side */
+        #slider {
+          display: flex;
+          width: 300vw; /* 3 slides × 100vw each */
+          height: 100vh;
+          transition: transform 0.5s ease;
+        }
+        /* Each slide fills the viewport */
+        .slide {
+          width: 100vw;
+          height: 100vh;
+          position: relative;
+        }
+        /* Navigation buttons */
+        .nav-button {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+          background: rgba(255,255,255,0.7);
+          border: none;
+          font-size: 2rem;
+          cursor: pointer;
+          padding: 0.5em 1em;
+        }
+        #prev { left: 10px; }
+        #next { right: 10px; }
+        /* Legend containers */
+        .legend {
+          position: absolute;
+          bottom: 20px;
+          left: 20px;
+          z-index: 10;
+          background: rgba(255,255,255,0.9);
+          padding: 0.5em;
+          max-width: 300px;
+          font-family: sans-serif;
+        }
+        /* Only show the legend for the active slide */
+        #legend1 { display: block; }
+        #legend2, #legend3 { display: none; }
+      </style>
+    </head>
+    <body>
+      <!-- Navigation buttons -->
+      <button id="prev" class="nav-button">&#10094;</button>
+      <button id="next" class="nav-button">&#10095;</button>
+
+      <!-- Slider container with three slides -->
+      <div id="slider">
+        <div id="map1" class="slide"></div>
+        <div id="map2" class="slide"></div>
+        <div id="map3" class="slide"></div>
+      </div>
+
+      <!-- Legends for each map -->
+      <!-- Legend for Map 1: Default TTI ranges -->
+      <div id="legend1" class="legend">
+        <h3> Assessing Transit travelshed Index  </h3>
+        <p>This map provides an overview of the TTI (Transit Travelshed Index) along with access to Subway stations access to assess Job opportunities. A travelshed index quantifies the geographic area that can be reached from a specific location within a set travel time or distance, reflecting the accessibility of key destinations. </p>
+        <h4>Legend: Mobility Index (Step Based)</h4>
+        <div>
+          <span style="background-color: #0066ff; display: inline-block; width: 20px; height: 20px;"> </span> Subway stops
+       </div>
+        <div>
+          <span style="background-color: #ffffff; display:inline-block; width:20px; height:20px;"></span>
+          1.0 - 1.2: Optimal Mobility
+        </div>
+        <div>
+          <span style="background-color: #ffd6a0; display:inline-block; width:20px; height:20px;"></span>
+          1.2 - 1.4: Moderate Congestion
+        </div>
+        <div>
+          <span style="background-color: #ffa94d; display:inline-block; width:20px; height:20px;"></span>
+          1.4 - 1.6: High Congestion
+        </div>
+        <div>
+          <span style="background-color: #ff8c1a; display:inline-block; width:20px; height:20px;"></span>
+          1.6 - 1.8: Severe Congestion
+        </div>
+        <div>
+          <span style="background-color: #ff6600; display:inline-block; width:20px; height:20px;"></span>
+          1.8 - 2.5: Extreme Congestion
+        </div>
+      </div>
+
+      <!-- Legend for Map 2: Quantile classification -->
+      <div id="legend2" class="legend">
+        <h3> Assessing Transit travelshed Index  </h3>
+        <p>This map provides an overview of the TTI (Transit Travelshed Index) along with access to Subway stations access to assess Job opportunities. A travelshed index quantifies the geographic area that can be reached from a specific location within a set travel time or distance, reflecting the accessibility of key destinations. </p>
+
+        <h4>Legend: Mobility Index (Linear Gradient)</h4>
+        <div>
+          <span style="background-color: #0066ff; display: inline-block; width: 20px; height: 20px;"> </span> Subway stops
+       </div>
+        <div>
+          <span style="background-color: #fee8c8; display:inline-block; width:20px; height:20px;"></span>
+          0-20%
+        </div>
+        <div>
+          <span style="background-color: #fdd49e; display:inline-block; width:20px; height:20px;"></span>
+          20-40%
+        </div>
+        <div>
+          <span style="background-color: #fdbb84; display:inline-block; width:20px; height:20px;"></span>
+          40-60%
+        </div>
+        <div>
+          <span style="background-color: #fc8d59; display:inline-block; width:20px; height:20px;"></span>
+          60-80%
+        </div>
+        <div>
+          <span style="background-color: #e34a33; display:inline-block; width:20px; height:20px;"></span>
+          80-100%
+        </div>
+      </div>
+
+      <!-- Legend for Map 3: Equal intervals classification -->
+      <nav id="menu"></nav>
+      <div id='map'></div>
+      <div id='title' class="title">
+
+        <hr>
+        <div id="legend3" class="legend">
+          <h3> Assessing Transit travelshed Index  </h3>
+          <p>This map provides an overview of the TTI (Transit Travelshed Index) along with access to Subway stations access to assess Job opportunities. A travelshed index quantifies the geographic area that can be reached from a specific location within a set travel time or distance, reflecting the accessibility of key destinations. </p>
+          <h4>Legend: Mobility Index (Equal Intervals)</h4>
+          <div>
+            <span style="background-color: #0066ff; display: inline-block; width: 20px; height: 20px;"> </span> Subway stops
+         </div>
+          <div>
+            <span style="background-color: #deebf7; display:inline-block; width:20px; height:20px;"></span>
+            &lt; 40,000
+          </div>
+          <div>
+            <span style="background-color: #deebf7; display:inline-block; width:20px; height:20px;"></span>
+            40,000–48,000
+          </div>
+          <div>
+            <span style="background-color: #c6dbef; display:inline-block; width:20px; height:20px;"></span>
+            48,000–56,000
+          </div>
+          <div>
+            <span style="background-color: #9ecae1; display:inline-block; width:20px; height:20px;"></span>
+            56,000–64,000
+          </div>
+          <div>
+            <span style="background-color: #6baed6; display:inline-block; width:20px; height:20px;"></span>
+            64,000–72,000
+          </div>
+          <div>
+            <span style="background-color: #3182bd; display:inline-block; width:20px; height:20px;"></span>
+            ≥ 72,000
+          </div>
+        <!-- </div>
+      </div> -->
+      <script src="map.js"></script>
+    </body>
+  </html>

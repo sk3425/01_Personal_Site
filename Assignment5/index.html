@@ -6,9 +6,9 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Source+Code+Pro:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; font-family: 'Open Sans', sans-serif; }
+        body { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; }
         .map-overlay {
             position: absolute;
@@ -33,6 +33,7 @@
             border-collapse: collapse;
             width: 100%;
             font-size: 12px;
+            font-family: 'Roboto', sans-serif;
         }
         .transportation-table th, .transportation-table td {
             border: 1px solid #ddd;
@@ -41,6 +42,7 @@
         }
         .transportation-table th {
             background-color: #f2f2f2;
+            font-weight: 500;
         }
         .transportation-table tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -49,6 +51,8 @@
             margin-top: 0;
             margin-bottom: 10px;
             font-size: 16px;
+            font-weight: 700;
+            font-family: 'Roboto', sans-serif;
         }
         .control-panel {
             position: absolute;
@@ -59,11 +63,13 @@
             border-radius: 3px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             z-index: 1;
+            font-family: 'Roboto', sans-serif;
         }
         select {
             padding: 5px;
             width: 100%;
             margin-bottom: 5px;
+            font-family: 'Roboto', sans-serif;
         }
         .map-title {
             position: absolute;
@@ -75,7 +81,8 @@
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             z-index: 1;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 700;
+            font-family: 'Roboto', sans-serif;
         }
         .map-description {
             position: absolute;
@@ -87,13 +94,15 @@
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             z-index: 1;
             font-size: 12px;
+            font-family: 'Roboto', sans-serif;
             max-width: 300px;
             line-height: 1.4;
         }
         .legend-title {
-            font-weight: bold;
+            font-weight: 700;
             margin-bottom: 10px;
             font-size: 14px;
+            font-family: 'Roboto', sans-serif;
         }
         .legend-slider-container {
             margin-top: 10px;
@@ -130,17 +139,28 @@
             text-align: center;
             font-size: 13px;
             margin-top: 5px;
+            font-family: 'Roboto', sans-serif;
         }
         .legend-min-max {
             display: flex;
             justify-content: space-between;
             margin-top: 5px;
             font-size: 12px;
+            font-family: 'Roboto', sans-serif;
         }
         .slider-divider {
             margin: 15px 0;
             border-top: 1px solid #ddd;
             padding-top: 10px;
+        }
+        code, pre {
+            font-family: 'Source Code Pro', monospace;
+        }
+        h4 {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            margin-bottom: 8px;
+            margin-top: 0;
         }
     </style>
 </head>
