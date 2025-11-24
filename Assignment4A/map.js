@@ -8,8 +8,8 @@ function createMap(containerId, mapType, projection) {
     container: containerId,
     style: 'mapbox://styles/sk3425/cm6o41tya01b701qmdpu9boh5',
     // Global view: initially show the entire globe.
-    zoom: 1,
-    center: [0, 0],
+    zoom: 10,
+    center: [-74, 40.725],
     minZoom: 0,
     maxZoom: 18,  // Allow zooming in to view detailed regional data (e.g., New York)
   });
